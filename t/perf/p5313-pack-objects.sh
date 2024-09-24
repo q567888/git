@@ -41,6 +41,14 @@ test_size 'thin pack size with --full-name-hash' '
 	test_file_size out
 '
 
+test_perf 'thin pack with --full-name-hash' '
+	git pack-objects --thin --stdout --revs --sparse --full-name-hash <in-thin >out
+'
+
+test_size 'thin pack size with --full-name-hash' '
+	test_file_size out
+'
+
 test_perf 'big pack' '
 	git pack-objects --stdout --revs --sparse  <in-big >out
 '
@@ -74,11 +82,28 @@ test_size 'shallow pack size with --full-name-hash' '
 	test_file_size out
 '
 
+test_perf 'big pack with --full-name-hash' '
+	git pack-objects --stdout --revs --sparse --full-name-hash <in-big >out
+'
+
+test_size 'big pack size with --full-name-hash' '
+	test_file_size out
+'
+
 test_perf 'repack' '
 	git repack -adf
 '
 
 test_size 'repack size' '
+	pack=$(ls .git/objects/pack/pack-*.pack) &&
+	test_file_size "$pack"
+'
+
+test_perf 'repack with --full-name-hash' '
+	git repack -adf --full-name-hash
+'
+
+test_size 'repack size with --full-name-hash' '
 	pack=$(ls .git/objects/pack/pack-*.pack) &&
 	test_file_size "$pack"
 '
