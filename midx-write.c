@@ -991,8 +991,8 @@ static int link_midx_to_chain(struct multi_pack_index *m)
 	for (i = 0; i < ARRAY_SIZE(midx_exts); i++) {
 		const unsigned char *hash = get_midx_checksum(m);
 
-		get_midx_filename_ext(&from, m->object_dir, hash,
-				      midx_exts[i].non_split);
+		get_midx_filename_ext(m->repo->hash_algo, &from, m->object_dir,
+				      hash, midx_exts[i].non_split);
 		get_split_midx_filename_ext(&to, m->object_dir, hash,
 					    midx_exts[i].split);
 
@@ -1012,9 +1012,8 @@ done:
 	return ret;
 }
 
-static void clear_midx_files(const char *object_dir,
-			     const char **hashes,
-			     uint32_t hashes_nr,
+static void clear_midx_files(struct repository *r, const char *object_dir,
+			     const char **hashes, uint32_t hashes_nr,
 			     unsigned incremental)
 {
 	/*
@@ -1039,7 +1038,7 @@ static void clear_midx_files(const char *object_dir,
 	}
 
 	if (incremental)
-		get_midx_filename(&buf, object_dir);
+		get_midx_filename(r->hash_algo, &buf, object_dir);
 	else
 		get_midx_chain_filename(&buf, object_dir);
 
@@ -1083,7 +1082,7 @@ static int write_midx_internal(struct repository *r, const char *object_dir,
 			    "%s/pack/multi-pack-index.d/tmp_midx_XXXXXX",
 			    object_dir);
 	else
-		get_midx_filename(&midx_name, object_dir);
+		get_midx_filename(r->hash_algo, &midx_name, object_dir);
 	if (safe_create_leading_directories(midx_name.buf))
 		die_errno(_("unable to create leading directories of %s"),
 			  midx_name.buf);
@@ -1474,7 +1473,7 @@ static int write_midx_internal(struct repository *r, const char *object_dir,
 	if (commit_lock_file(&lk) < 0)
 		die_errno(_("could not write multi-pack-index"));
 
-	clear_midx_files(object_dir, keep_hashes,
+	clear_midx_files(r, object_dir, keep_hashes,
 			 ctx.num_multi_pack_indexes_before + 1,
 			 ctx.incremental);
 
