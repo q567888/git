@@ -236,11 +236,13 @@ void get_midx_chain_filename(struct strbuf *buf, const char *object_dir)
 	strbuf_addstr(buf, "/multi-pack-index-chain");
 }
 
-void get_split_midx_filename_ext(struct strbuf *buf, const char *object_dir,
+void get_split_midx_filename_ext(const struct git_hash_algo *hash_algo,
+				 struct strbuf *buf, const char *object_dir,
 				 const unsigned char *hash, const char *ext)
 {
 	get_midx_chain_dirname(buf, object_dir);
-	strbuf_addf(buf, "/multi-pack-index-%s.%s", hash_to_hex(hash), ext);
+	strbuf_addf(buf, "/multi-pack-index-%s.%s",
+		    hash_to_hex_algop(hash, hash_algo), ext);
 }
 
 static int open_multi_pack_index_chain(const struct git_hash_algo *hash_algo,
@@ -328,8 +330,8 @@ static struct multi_pack_index *load_midx_chain_fd_st(struct repository *r,
 		valid = 0;
 
 		strbuf_reset(&buf);
-		get_split_midx_filename_ext(&buf, object_dir, layer.hash,
-					    MIDX_EXT_MIDX);
+		get_split_midx_filename_ext(r->hash_algo, &buf, object_dir,
+					    layer.hash, MIDX_EXT_MIDX);
 		m = load_multi_pack_index_one(r, object_dir, buf.buf, local);
 
 		if (m) {

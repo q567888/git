@@ -993,7 +993,8 @@ static int link_midx_to_chain(struct multi_pack_index *m)
 
 		get_midx_filename_ext(m->repo->hash_algo, &from, m->object_dir,
 				      hash, midx_exts[i].non_split);
-		get_split_midx_filename_ext(&to, m->object_dir, hash,
+		get_split_midx_filename_ext(m->repo->hash_algo, &to,
+					    m->object_dir, hash,
 					    midx_exts[i].split);
 
 		if (link(from.buf, to.buf) < 0 && errno != ENOENT) {
@@ -1439,8 +1440,8 @@ static int write_midx_internal(struct repository *r, const char *object_dir,
 		if (link_midx_to_chain(ctx.base_midx) < 0)
 			return -1;
 
-		get_split_midx_filename_ext(&final_midx_name, object_dir,
-					    midx_hash, MIDX_EXT_MIDX);
+		get_split_midx_filename_ext(r->hash_algo, &final_midx_name,
+					    object_dir, midx_hash, MIDX_EXT_MIDX);
 
 		if (rename_tempfile(&incr, final_midx_name.buf) < 0) {
 			error_errno(_("unable to rename new multi-pack-index layer"));
