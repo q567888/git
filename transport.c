@@ -178,6 +178,7 @@ static int fetch_refs_from_bundle(struct transport *transport,
 {
 	struct verify_bundle_opts opts = { .flags = fetch_pack_fsck_objects() ?
 							    VERIFY_BUNDLE_FSCK : 0 };
+	struct fetch_pack_options fetch_pack_options = FETCH_PACK_OPTIONS_INIT;
 	struct bundle_transport_data *data = transport->data;
 	struct strvec extra_index_pack_args = STRVEC_INIT;
 	int ret;
@@ -188,11 +189,15 @@ static int fetch_refs_from_bundle(struct transport *transport,
 	if (!data->get_refs_from_bundle_called)
 		get_refs_from_bundle_inner(transport);
 
+	git_config(fetch_pack_config_cb, &fetch_pack_options);
+	opts.fsck_msg_types = fetch_pack_options.fsck_msg_types.buf;
+
 	ret = unbundle(the_repository, &data->header, data->fd,
 		       &extra_index_pack_args, &opts);
 	transport->hash_algo = data->header.hash_algo;
 
 	strvec_clear(&extra_index_pack_args);
+	strbuf_release(&fetch_pack_options.fsck_msg_types);
 	return ret;
 }
 
