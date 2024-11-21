@@ -1857,8 +1857,8 @@ static struct ref *do_fetch_pack_v2(struct fetch_pack_args *args,
 	return ref;
 }
 
-static int fetch_pack_config_cb(const char *var, const char *value,
-				const struct config_context *ctx, void *cb)
+int fetch_pack_config_cb(const char *var, const char *value,
+			 const struct config_context *ctx, void *cb)
 {
 	struct fetch_pack_options *opts = cb;
 	const char *msg_id;

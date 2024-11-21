@@ -1,6 +1,7 @@
 #ifndef FETCH_PACK_H
 #define FETCH_PACK_H
 
+#include "config.h"
 #include "string-list.h"
 #include "protocol.h"
 #include "list-objects-filter-options.h"
@@ -113,5 +114,8 @@ struct fetch_pack_options {
 #define FETCH_PACK_OPTIONS_INIT { \
 	.fsck_msg_types = STRBUF_INIT, \
 }
+
+int fetch_pack_config_cb(const char *var, const char *value,
+			 const struct config_context *ctx, void *cb);
 
 #endif
