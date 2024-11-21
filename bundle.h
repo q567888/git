@@ -41,6 +41,7 @@ int verify_bundle(struct repository *r, struct bundle_header *header,
 
 struct verify_bundle_opts {
 	enum verify_bundle_flags flags;
+	const char *fsck_msg_types;
 };
 
 /**

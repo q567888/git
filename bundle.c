@@ -646,7 +646,8 @@ int unbundle(struct repository *r, struct bundle_header *header, int bundle_fd,
 		strvec_push(&ip.args, "--promisor=from-bundle");
 
 	if (opts.flags & VERIFY_BUNDLE_FSCK)
-		strvec_push(&ip.args, "--fsck-objects");
+		strvec_pushf(&ip.args, "--fsck-objects%s",
+			     opts.fsck_msg_types ? opts.fsck_msg_types : "");
 
 	if (extra_index_pack_args)
 		strvec_pushv(&ip.args, extra_index_pack_args->v);
