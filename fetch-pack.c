@@ -48,8 +48,8 @@ static int server_supports_filtering;
 static int advertise_sid;
 static struct shallow_lock shallow_lock;
 static const char *alternate_shallow_file;
+static struct fetch_pack_options fetch_pack_options = FETCH_PACK_OPTIONS_INIT;
 static struct fsck_options fsck_options = FSCK_OPTIONS_MISSING_GITMODULES;
-static struct strbuf fsck_msg_types = STRBUF_INIT;
 static struct string_list uri_protocols = STRING_LIST_INIT_DUP;
 
 /* Remember to update object flag allocation in object.h */
@@ -1017,7 +1017,7 @@ static int get_pack(struct fetch_pack_args *args,
 			strvec_push(&cmd.args, "--fsck-objects");
 		else
 			strvec_pushf(&cmd.args, "--strict%s",
-				     fsck_msg_types.buf);
+				     fetch_pack_options.fsck_msg_types.buf);
 	}
 
 	if (index_pack_args) {
@@ -1860,6 +1860,7 @@ static struct ref *do_fetch_pack_v2(struct fetch_pack_args *args,
 static int fetch_pack_config_cb(const char *var, const char *value,
 				const struct config_context *ctx, void *cb)
 {
+	struct fetch_pack_options *opts = cb;
 	const char *msg_id;
 
 	if (strcmp(var, "fetch.fsck.skiplist") == 0) {
@@ -1867,8 +1868,8 @@ static int fetch_pack_config_cb(const char *var, const char *value,
 
 		if (git_config_pathname(&path, var, value))
 			return 1;
-		strbuf_addf(&fsck_msg_types, "%cskiplist=%s",
-			fsck_msg_types.len ? ',' : '=', path);
+		strbuf_addf(&opts->fsck_msg_types, "%cskiplist=%s",
+			    opts->fsck_msg_types.len ? ',' : '=', path);
 		free(path);
 		return 0;
 	}
@@ -1877,8 +1878,9 @@ static int fetch_pack_config_cb(const char *var, const char *value,
 		if (!value)
 			return config_error_nonbool(var);
 		if (is_valid_msg_type(msg_id, value))
-			strbuf_addf(&fsck_msg_types, "%c%s=%s",
-				fsck_msg_types.len ? ',' : '=', msg_id, value);
+			strbuf_addf(&opts->fsck_msg_types, "%c%s=%s",
+				    opts->fsck_msg_types.len ? ',' : '=',
+				    msg_id, value);
 		else
 			warning("Skipping unknown msg id '%s'", msg_id);
 		return 0;
@@ -1904,7 +1906,7 @@ static void fetch_pack_config(void)
 		}
 	}
 
-	git_config(fetch_pack_config_cb, NULL);
+	git_config(fetch_pack_config_cb, &fetch_pack_options);
 }
 
 static void fetch_pack_setup(void)

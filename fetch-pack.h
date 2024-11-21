@@ -106,4 +106,12 @@ int report_unmatched_refs(struct ref **sought, int nr_sought);
  */
 int fetch_pack_fsck_objects(void);
 
+struct fetch_pack_options {
+	struct strbuf fsck_msg_types;
+};
+
+#define FETCH_PACK_OPTIONS_INIT { \
+	.fsck_msg_types = STRBUF_INIT, \
+}
+
 #endif
