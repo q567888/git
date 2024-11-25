@@ -1,6 +1,7 @@
 #ifndef FETCH_PACK_H
 #define FETCH_PACK_H
 
+#include "config.h"
 #include "string-list.h"
 #include "protocol.h"
 #include "list-objects-filter-options.h"
@@ -107,5 +108,16 @@ int report_unmatched_refs(struct ref **sought, int nr_sought);
  * Return true if checks for broken objects in received pack are required.
  */
 int fetch_pack_fsck_objects(void);
+
+struct fetch_pack_options {
+	struct strbuf fsck_msg_types;
+};
+
+#define FETCH_PACK_OPTIONS_INIT { \
+	.fsck_msg_types = STRBUF_INIT, \
+}
+
+int fetch_pack_config_cb(const char *var, const char *value,
+			 const struct config_context *ctx, void *cb);
 
 #endif
